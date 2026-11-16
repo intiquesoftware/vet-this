@@ -1,4 +1,4 @@
-# vet-this
+# Vet This
 
 A Claude Code skill for the moment you see a hyped tool in a repo, a YouTube video or an
 Instagram reel and wonder whether to try it. Paste the link and ask. vet-this answers three
