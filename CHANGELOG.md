@@ -4,6 +4,16 @@ All notable changes to this skill are listed here. Versions follow [semver](http
 patch = fixes and scanner tuning, minor = new patterns, sources or checks, major = a change to the
 report format or profile file.
 
+## [2.0.1] - 2026-11-20
+
+### Reverted
+- The 2.0.0 change to verdict (A) and the report format. (A) and the report template are back to
+  1.0.0: the claims table plus the separate project health table. 1.0.0 already checked each
+  claim against the code.
+
+### Kept
+- The 2.0.0 work folder cleanup fix.
+
 ## [2.0.0] - 2026-11-20
 
 ### Changed
