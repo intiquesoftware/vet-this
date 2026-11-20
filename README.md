@@ -4,7 +4,8 @@ A Claude Code skill for the moment you see a hyped tool in a repo, a YouTube vid
 Instagram reel and wonder whether to try it. Paste the link and ask. vet-this answers three
 questions:
 
-- **(A) Hype:** does it actually do what the post claims?
+- **(A) Hype:** do the claims in the video, post or README hold up against what the tool can
+  actually do? Each claim gets its own verdict and evidence. Stars are context, not proof.
 - **(B) Safety:** is it safe to install and use?
 - **(C) Fit:** is it any use for *your* projects and workflows?
 
@@ -21,8 +22,8 @@ I'm curious about this one, is it safe? https://youtu.be/XXXXXXXX
 
 | Part | How |
 |---|---|
-| Claims | Reads the caption and transcript and looks at frames from the video, so on-screen text and install commands are caught too. Lists every claim. |
-| Hype | Finds the code behind each claim. Pulls GitHub signals (age, commits, contributors, releases, most discussed issues, star velocity, owner account age). |
+| Claims | Reads the caption and transcript and looks at frames from the video, so on-screen text and install commands are caught too. For a repo link alone, the README's headline promises. Lists every claim with where it was said. |
+| Hype | Checks each claim against the code: one row per claim with where it was said, a verdict (Holds / Partly / Doesn't hold / Can't verify) and evidence as a file path or URL. GitHub signals (stars, star velocity, commits, contributors, releases, owner account age) appear in a separate context line and never change a claim's verdict. |
 | Safety | Static scan with 48 patterns drawn from published research on malicious Claude skills, MCP tool poisoning and 2026 npm/PyPI attacks: install-time hooks, `curl \| sh`, reverse shells, credential and browser-data access, cloud metadata, API-traffic redirects, webhooks and uploads, persistence (including writes to `CLAUDE.md`), Claude Code hooks and permission bypasses, `<IMPORTANT>`-style tool poisoning, secrecy and coercive instructions, obfuscation. It lists every outside host the code contacts and flags the combinations real stealers use. Then Claude reads the flagged lines and entry points in context. Sources: `references/pattern-sources.md`. |
 | Fit | Compares against your installed skills and plugins and a short profile you write about your work. |
 

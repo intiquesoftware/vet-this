@@ -4,6 +4,24 @@ All notable changes to this skill are listed here. Versions follow [semver](http
 patch = fixes and scanner tuning, minor = new patterns, sources or checks, major = a change to the
 report format or profile file.
 
+## [2.0.0] - 2026-11-20
+
+### Changed
+- Verdict (A) is now explicitly claims against capability. Each claim from the video, post or
+  README is its own row: claim, where it was said, verdict (Holds / Partly / Doesn't hold /
+  Can't verify) and evidence as a file path or URL. The old "What was claimed" and "(A)" tables
+  are merged into one. Stars and project health move to a separate context line and never
+  change a claim's verdict. New "Judging (A)" section in `SKILL.md`. (Report format change,
+  hence the major version.)
+- Skill description and README describe (A) the same way.
+
+### Fixed
+- Work folder cleanup. `SKILL.md` now resolves the temp folder once to a literal absolute path,
+  never stores it in a shell variable, never `cd`s into it, and deletes it with
+  `rm -rf -- "/full/literal/path"` from outside. This fixes two failures seen in real runs:
+  Claude Code's safety check blocking `rm -rf $W`, and `getcwd: cannot access parent
+  directories` after the shell deleted the folder it was standing in.
+
 ## [1.0.0] - 2026-11-15
 
 First public release.

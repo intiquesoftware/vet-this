@@ -10,19 +10,19 @@
 
 {2 to 3 sentences. What it is, whether to bother, and the single most important reason.}
 
-## What was claimed
+## (A) Do the claims hold up?
 
-| # | Claim | Where it was made |
-|---|---|---|
-| 1 | {claim, in plain words} | {caption, 0:12 in video, README} |
+Each claim made in the video, post or README, checked against what the code can actually do.
 
-## (A) Does it live up to the hype?
+| # | Claim | Where it was said | Verdict | Evidence |
+|---|---|---|---|---|
+| 1 | {claim, in plain words; one claim per row} | {0:42 in video / caption / on screen at 1:10 / README "Features"} | {Holds / Partly / Doesn't hold / Can't verify} | {file path with line or function, or URL; for Partly, the gap; for Can't verify, what would settle it} |
 
-| # | Claim | Evidence | Verdict |
-|---|---|---|---|
-| 1 | {claim} | {what the code, docs, issues or stats show, with file paths} | {Holds / Partly / Doesn't hold / Can't verify} |
+**Overall (A):** {Lives up to it / Partly / Doesn't hold / Can't verify}, because {the headline claim's row and the one or two rows that decided it}.
 
-**Project health**
+**Context (not evidence):** {n} stars, {n} forks, {n} contributors, last push {date}; {organic growth, or a spike that matches the post date}. Popularity does not change any verdict above.
+
+**Project health details (context only)**
 
 | Signal | Value | Read |
 |---|---|---|

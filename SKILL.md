@@ -3,7 +3,8 @@ name: vet-this
 description: >
   Review a GitHub repo, Claude skill, plugin, MCP server or app, or a YouTube video, Instagram
   reel, TikTok or X post that promotes one, and report three verdicts: (A) does it live up to
-  the hype, (B) is it safe to install and use, and (C) is it a fit for the user's projects and
+  the hype, checked claim by claim against what the code can actually do (stars are context
+  only), (B) is it safe to install and use, and (C) is it a fit for the user's projects and
   workflows. Read-only: clones and reads code, never installs or runs it. Saves report.md and
   report.html. Use when: "vet this", "/vet-this", "I'm curious about this repo/video/reel",
   "is this legit", "is this safe to install", "does this live up to the hype", "should I
@@ -15,7 +16,7 @@ license: MIT
 user-invocable: true
 argument-hint: "<repo, video or reel URL, or local video path> [what you want to know]"
 metadata:
-  version: "1.0.0"
+  version: "2.0.0"
   category: research
 ---
 
@@ -76,7 +77,19 @@ Pick a `slug`: the subject's own name in lowercase kebab-case (repo name, tool n
 `<creator>-<topic>` for a video with no named tool). Then:
 
 - Report folder: `<report_dir>/<YYYY-MM-DD>-<slug>/` (date from the system clock).
-- Work folder: `${TMPDIR:-/tmp}/vet-this/<slug>/` for downloads and the clone.
+- Work folder: for downloads and the clone. Resolve it **once** to a literal absolute path:
+
+  ```bash
+  python3 -I -c 'import os,tempfile; print(os.path.realpath(tempfile.gettempdir()))'
+  ```
+
+  The work folder is `<that path>/vet-this/<slug>` (for example
+  `/private/var/folders/xy/abc123/T/vet-this/shiny-new-skill`). From here on, write that full
+  path out in every command. Never store it in a shell variable such as `$W`, and never `cd`
+  into it: run every command from your normal working folder and pass the work path as an
+  argument (`git -C "<work>/repo" log`, `ls "<work>/media"`). Create it with
+  `mkdir -p -- "<work>"`. If it already exists from an earlier run, delete it first the same
+  way as in Step 5.
 
 ## Step 2: media sources
 
@@ -89,7 +102,8 @@ Read `contact-sheet.jpg` first (every frame in one image), then open single fram
 text is too small to read. On-screen text often names the repo, shows the install command, or
 reveals the "product" is a mockup (for example, code on screen that does not match the UI
 shown). Build the claims list: every capability, number or comparison the creator states,
-with where it was said.
+with where it was said (timestamp such as `0:42`, `caption`, `on screen at 1:10`). This list
+is the backbone of verdict (A); see "Judging (A)" below.
 
 Find the actual subject:
 
@@ -118,6 +132,9 @@ GIT_TERMINAL_PROMPT=0 GIT_LFS_SKIP_SMUDGE=1 git clone --depth 1 --no-recurse-sub
 python3 -I "$SKILL_DIR/scripts/safety_scan.py" "<work>/repo" --out "<work>/scan.md"
 ```
 
+`<work>` is the literal absolute path from Step 1, written out in full. Read the clone with
+paths or `git -C "<work>/repo" ...`; do not `cd` into it.
+
 Then read by hand, following `$SKILL_DIR/references/safety-checklist.md`:
 
 1. README (claims and install steps), LICENSE, and the dependency manifests.
@@ -133,12 +150,36 @@ Then read by hand, following `$SKILL_DIR/references/safety-checklist.md`:
 4. What the tool can do once connected (for MCP servers, the tool list) and which built-in
    safety controls exist (read-only mode, approval prompts, scoped tokens). The safest
    setting goes in the report.
-5. For each hype claim: find the code that does it. "Holds" needs a file path. Check the most
-   discussed issues for "doesn't work", "broken", "scam" or "slow" themes.
+5. For each claim on the claims list: find the code that does it (see "Judging (A)").
+   Check the most discussed issues for "doesn't work", "broken", "scam" or "slow" themes.
 
-Star counts: compare `stars_per_day` and `recent_star_sample` against the video's post date. A
-spike right after a viral post is normal attention; thousands of stars with one commit, no
-issues, and a new owner account is a warning sign.
+### Judging (A): claims against capability
+
+(A) answers one question: **do the claims hold up against what the tool can actually do?**
+Popularity is not evidence that a claim is true.
+
+1. **Claims list.** From a video or post: the list from Step 2. From a repo link alone: the
+   README's headline promises (the tagline, feature list, benchmarks and comparisons), with
+   `README` plus the section name as the source. Split compound claims ("fast, private and
+   works offline" is three rows).
+2. **One verdict per claim**, from exactly these four:
+   - **Holds:** the code does it as stated. Evidence is a file path (with line or function).
+   - **Partly:** it exists but is narrower, slower, paid, manual or experimental compared
+     with the claim. Say what the gap is.
+   - **Doesn't hold:** the code does not do it, contradicts it, or issues show it failing.
+     Evidence is the file path or issue URL that shows this.
+   - **Can't verify:** needs running it, a paid account, private code, or a benchmark you
+     cannot reproduce. Say what would settle it.
+3. **Evidence is a file path or URL, every row.** "Looks right" is not evidence.
+4. **Overall (A):** Lives up to it (headline claims hold), Partly (core works, some claims
+   overstated), Doesn't hold (a headline claim fails), or Can't verify (most rows are Can't
+   verify). The headline claim, the one the post leads with, weighs most.
+
+**Context, not evidence: stars and project health.** Stars, forks, contributors and releases
+go in a separate context line under the claims table. They never move a claim's verdict.
+Compare `stars_per_day` and `recent_star_sample` against the video's post date: a spike right
+after a viral post is normal attention; thousands of stars with one commit, no issues, and a
+new owner account is a warning sign worth naming in that context line.
 
 ## Step 4: fit (C)
 
@@ -162,7 +203,18 @@ python3 -I "$SKILL_DIR/scripts/md_to_html.py" "<report folder>/report.md"
 Writing rules for the report: plain words, short sentences, no em dashes, cite file paths and
 URLs for every claim, and state what was not checked.
 
-Delete the work folder unless the user asks to keep the clone.
+Delete the work folder unless the user asks to keep the clone. Use the literal absolute path,
+quoted, from your normal working folder (never from inside the work folder):
+
+```bash
+rm -rf -- "/private/var/folders/xy/abc123/T/vet-this/shiny-new-skill"
+test -e "/private/var/folders/xy/abc123/T/vet-this/shiny-new-skill" && echo "still there" || echo "removed"
+```
+
+Two things break cleanup: `rm -rf $W` (an unquoted variable that could be empty; Claude Code's
+safety check blocks it), and deleting the folder the shell is standing in (every later command
+then fails with `getcwd: cannot access parent directories`). If that error shows up anyway, run
+`cd "$HOME"` once and carry on.
 
 ## Step 6: reply in chat
 
